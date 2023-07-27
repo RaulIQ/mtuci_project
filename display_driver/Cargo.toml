@@ -1,0 +1,9 @@
+[package]
+name = "display_driver"
+version = "0.1.0"
+edition = "2021"
+authors = ["Raul"]
+
+[dependencies]
+embassy-stm32.workspace = true
+defmt.workspace = true

@@ -1,0 +1,9 @@
+[package]
+name = "keyboard_driver"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+embassy-stm32.workspace = true
+embassy-time.workspace = true
+defmt.workspace = true
