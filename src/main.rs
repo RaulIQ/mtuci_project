@@ -51,69 +51,80 @@ async fn main(_spawner: Spawner) -> ! {
     let mut n = 0;
 
     loop {
+        let b = key.get_str().await;
+
         if n <= 9999999 {
-            match key.get_digit().await {
-                Some(d) => n = n * 10 + (d as u32),
-                None => {
-                    match key.get_str().await{
-                        "F1" => { n = 0 }
-                        "F2" => {
-                            if n != 0 {
+            match b {
+                "1" => n = n * 10 + 1,
+                "2" => n = n * 10 + 2,
+                "3" => n = n * 10 + 3,
+                "4" => n = n * 10 + 4,
+                "5" => n = n * 10 + 5,
+                "6" => n = n * 10 + 6,
+                "7" => n = n * 10 + 7,
+                "8" => n = n * 10 + 8,
+                "9" => n = n * 10 + 9,
+                "0" => n = n * 10 + 0,
+                _ => {},
+            }
+        }
+
+        match b {
+            "F1" =>  n = 0,
+            "F2" => {
+                if n != 0 {
+                    loop {
+                        let mut seg = [0.to_segment(false, false); 8];
+                        let mut arr = [0; 8];
+                        let number = n;
+                        let mut cursor = 0;
+
+                        fill_with_digits(number, &mut arr);
+
+                        let mut k = 0;
+                        for i in 0..8 {
+                            if k == 0 && arr[i] != 0 {
+                                seg[i] = arr[i].to_segment(false, true);
+                                cursor = i;
+                                k += 1;
+                            } else {
+                                seg[i] = arr[i].to_segment(i != 0 && arr[i - 1] % 2 == 1, false);
+                            }
+                        }
+
+                        let button = key.get_str().await;
+                        match button {
+                            "F1" => break,
+                            "F2" => {
                                 loop {
-                                    let mut seg = [0.to_segment(false, false); 8];
-                                    let mut arr = [0; 8];
-                                    let number = n;
-                                    let mut cursor = 0;
+                                    display.write_auto(&seg);
 
-                                    fill_with_digits(number, &mut arr);
-
-                                    let mut k = 0;
-                                    for i in 0..8 {
-                                        if k == 0 && arr[i] != 0 {
-                                            seg[i] = arr[i].to_segment(false, true);
-                                            cursor = i;
-                                            k += 1;
-                                        } else {
-                                            seg[i] = arr[i].to_segment(i != 0 && arr[i - 1] % 2 == 1, false);
-                                        }
-                                    }
-
-                                    let button = key.get_str().await;
-                                    match button {
+                                    let b = key.get_str().await;
+                                    match b {
                                         "F1" => break,
                                         "F2" => {
-                                            loop {
-                                                display.write_auto(&seg);
-
-                                                let b = key.get_str().await;
-                                                match b {
-                                                    "F1" => break,
-                                                    "F2" => {
-                                                        let seg_len = seg.len();
-                                                        if cursor < seg_len {
-                                                            let digit = arr[cursor];
-                                                            let segment = &mut seg[cursor];
-                                                            *segment = if !segment.led_on { digit / 2 } else { (digit + 10) / 2 }
-                                                                .to_segment(cursor == seg_len - 1 && digit % 2 == 1, false);
-                                                            if let Some(last) = seg.get_mut(cursor + 1) {
-                                                                last.with_dot = cursor < seg_len;
-                                                            }
-                                                            cursor += 1;
-                                                        }
-                                                    }
-                                                    _ => {}
+                                            let seg_len = seg.len();
+                                            if cursor < seg_len {
+                                                let digit = arr[cursor];
+                                                let segment = &mut seg[cursor];
+                                                *segment = if !segment.led_on { digit / 2 } else { (digit + 10) / 2 }
+                                                    .to_segment(cursor == seg_len - 1 && digit % 2 == 1, false);
+                                                if let Some(last) = seg.get_mut(cursor + 1) {
+                                                    last.with_dot = cursor < seg_len;
                                                 }
+                                                cursor += 1;
                                             }
                                         }
                                         _ => {}
                                     }
                                 }
                             }
-                        },
-                        _ => {}
+                            _ => {}
+                        }
                     }
-                },
-            }
+                }
+            },
+            _ => {},
         }
         display.print_number(n);
     }
